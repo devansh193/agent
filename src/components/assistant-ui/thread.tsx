@@ -25,12 +25,12 @@ import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button
 export const Thread: FC = () => {
   return (
     <ThreadPrimitive.Root
-      className="bg-background flex h-full flex-col overflow-hidden"
+      className="bg-background flex h-full flex-col"
       style={{
         ["--thread-max-width" as string]: "42rem",
       }}
     >
-      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-scroll scroll-smooth bg-inherit px-4 pt-8">
+      <ThreadPrimitive.Viewport className="flex flex-col items-center overflow-y-auto bg-inherit px-4 pt-8 h-[calc(100vh-12rem)]">
         <ThreadWelcome />
 
         <ThreadPrimitive.Messages
@@ -86,7 +86,7 @@ const ThreadWelcomeSuggestions: FC = () => {
     <div className="mt-3 flex w-full items-stretch justify-center gap-4">
       <ThreadPrimitive.Suggestion
         className="hover:bg-muted/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-2 transition-colors ease-in"
-        prompt="What is the weather in Tokyo?"
+        prompt="What are latest ReactJs ?"
         method="replace"
         autoSend
       >
