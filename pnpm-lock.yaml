@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@ai-sdk/google':
+    specifier: ^1.1.18
+    version: 1.1.18(zod@3.24.2)
   '@ai-sdk/openai':
     specifier: ^1.1.15
     version: 1.1.15(zod@3.24.2)
@@ -213,6 +216,17 @@ devDependencies:
     version: 5.8.2
 
 packages:
+
+  /@ai-sdk/google@1.1.18(zod@3.24.2):
+    resolution: {integrity: sha512-yOqoNhgkyBQPOJt3dPm86Ubn5qJ2N0pwrXE6xhJ42lM0tSszB6Gk5770QO3mTKqfUW2aQ/fbOb6f5u7YHcoy1Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+    dependencies:
+      '@ai-sdk/provider': 1.0.9
+      '@ai-sdk/provider-utils': 2.1.10(zod@3.24.2)
+      zod: 3.24.2
+    dev: false
 
   /@ai-sdk/openai@1.1.15(zod@3.24.2):
     resolution: {integrity: sha512-irGQx5lMrYI9gub7Sy2ZHu49D3Icf7OtfOu3X8fVKMONOyi54RTKRNjVZTewkfRNE44psTbZDO8j8qmPirOTNQ==}
