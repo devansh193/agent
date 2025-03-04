@@ -30,6 +30,10 @@ export default function RootLayout({
         >
           {children}
         </body>
+        <script
+          src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs"
+          async
+        />
       </html>
     </ClerkProvider>
   );

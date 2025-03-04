@@ -1,27 +1,9 @@
-interface S3Location {
-  bucket: string;
-  key: string;
-}
+import { S3Client } from "@aws-sdk/client-s3";
 
-export const parseS3Url = (url: string): S3Location => {
-  try {
-    if (url.startsWith("s3://")) {
-      const parts = url.replace("s3://", "").split("/");
-      const bucket = parts.shift()!;
-      const key = parts.join("/");
-      return { bucket, key };
-    }
-
-    if (url.includes(".s3.") && url.includes("amazonaws.com")) {
-      const urlObj = new URL(url);
-      const bucket = urlObj.hostname.split(".")[0];
-      const key = urlObj.pathname.substring(1);
-      return { bucket, key };
-    }
-
-    throw new Error("Invalid S3 URL format");
-  } catch (error) {
-    console.error("Error parsing S3 URL:", error);
-    throw new Error(`Failed to parse S3 URL: ${url}`);
-  }
-};
+export const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+  },
+});

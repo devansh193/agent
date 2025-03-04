@@ -10,10 +10,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress"; // Import getUploadUrl function
+import { Progress } from "@/components/ui/progress";
 import { getUploadUrl } from "@/actions/uploadFile";
-import { analyzer } from "@/actions/analyzer";
-import { ResumeFileType } from "@/lib/parsers";
 
 type FileStatus = "idle" | "uploading" | "success" | "error";
 
@@ -25,16 +23,13 @@ interface FileWithStatus {
 }
 
 export default function FileUploader() {
-  const [files, setFiles] = useState<FileWithStatus[]>([]);
+  const [file, setFile] = useState<FileWithStatus | null>(null);
+  const [parsedText, setParsedText] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles = acceptedFiles.map((file) => ({
-      file,
-      status: "idle" as FileStatus,
-      progress: 0,
-    }));
-
-    setFiles((prev) => [...prev, ...newFiles]);
+    if (acceptedFiles.length > 0) {
+      setFile({ file: acceptedFiles[0], status: "idle", progress: 0 });
+    }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -46,97 +41,51 @@ export default function FileUploader() {
         [".docx"],
     },
     maxSize: 10 * 1024 * 1024, // 10MB
+    multiple: false, // Restrict to one file
   });
 
-  const handleUpload = async (
-    fileWithStatus: FileWithStatus,
-    index: number
-  ) => {
-    if (fileWithStatus.status === "uploading") return;
+  const handleUpload = async () => {
+    if (!file || file.status === "uploading") return;
 
-    // Set file status to "uploading"
-    setFiles((prev) => {
-      const newFiles = [...prev];
-      newFiles[index] = {
-        ...newFiles[index],
-        status: "uploading",
-        progress: 0,
-      };
-      return newFiles;
-    });
+    const formData = new FormData();
+    formData.append("FILE", file.file);
+    setFile({ ...file, status: "uploading", progress: 0 });
 
     try {
-      // Get pre-signed URL for upload
-      const { url, key } = await getUploadUrl(
-        fileWithStatus.file.name,
-        fileWithStatus.file.type
-      );
+      // Step 1: Upload the file to the storage service
+      const { url, key } = await getUploadUrl(file.file.name, file.file.type);
+      if (!url || !key) throw new Error("Failed to get upload URL");
 
-      if (!url) throw new Error("Failed to get upload URL");
-
-      console.log("Uploading to:", url, "S3 Key:", key);
-
-      // Upload file to S3
-      const response = await fetch(url, {
+      const uploadResponse = await fetch(url, {
         method: "PUT",
-        body: fileWithStatus.file,
-        headers: { "Content-Type": fileWithStatus.file.type },
+        body: file.file,
+        headers: { "Content-Type": file.file.type },
       });
 
-      if (!response.ok) throw new Error("Upload failed");
-
-      // Construct the file URL (removing query params)
-      const fileUrl = url.split("?")[0];
-
-      console.log("File uploaded successfully:", fileUrl);
-
-      // Update file status to "success"
-      setFiles((prev) => {
-        const newFiles = [...prev];
-        newFiles[index] = {
-          ...newFiles[index],
-          status: "success",
-          progress: 100,
-        };
-        return newFiles;
+      if (!uploadResponse.ok) throw new Error("Upload failed");
+      const parseResponse = await fetch("/api/parse-data", {
+        method: "POST",
+        body: formData,
       });
 
-      // **Call Analyzer Function**
-      // console.log("Analyzing resume...");
-      // const analysisResult = await analyzer({
-      //   fileUrl,
-      //   fileType: fileWithStatus.file.type as ResumeFileType,
-      // });
+      if (!parseResponse.ok) {
+        const errorData = await parseResponse.json();
+        throw new Error(errorData.error || "Failed to upload file.");
+      }
 
-      // console.log("Analysis result:", analysisResult);
-
-      setFiles((prev) => {
-        const newFiles = [...prev];
-        newFiles[index] = {
-          ...newFiles[index],
-        };
-        return newFiles;
-      });
+      const result = await parseResponse.json();
+      setParsedText(result.parsedText);
+      setFile({ ...file, status: "success", progress: 100 });
+      return result;
     } catch (error) {
-      console.error("Upload or analysis error:", error);
-
-      // Update file status to "error"
-      setFiles((prev) => {
-        const newFiles = [...prev];
-        newFiles[index] = {
-          ...newFiles[index],
-          status: "error",
-          progress: 0,
-          error:
-            error instanceof Error ? error.message : "Upload/Analysis failed",
-        };
-        return newFiles;
+      setFile({
+        ...file,
+        status: "error",
+        progress: 0,
+        error: error instanceof Error ? error.message : "Upload failed",
       });
+      throw error; // Re-throw the error if you want to handle it outside this function
     }
-  };
-
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -153,99 +102,79 @@ export default function FileUploader() {
         <div className="flex flex-col items-center justify-center space-y-3">
           <Upload className="h-10 w-10 text-gray-400" />
           <p className="text-lg font-medium">
-            {isDragActive ? "Drop files here" : "Drag & drop files here"}
+            {isDragActive ? "Drop file here" : "Drag & drop file here"}
           </p>
-          <p className="text-sm text-gray-500">or click to browse files</p>
+          <p className="text-sm text-gray-500">or click to browse</p>
           <p className="text-xs text-gray-400">
-            Supports PDF, DOC, and DOCX files (max 10MB)
+            Supports PDF, DOC, and DOCX (max 10MB)
           </p>
         </div>
       </div>
 
-      {files.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Files</h3>
-          <div className="space-y-3">
-            {files.map((fileWithStatus, index) => (
-              <div
-                key={`${fileWithStatus.file.name}-${index}`}
-                className="border rounded-lg p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <FileText className="h-5 w-5 text-gray-500" />
-                    <div>
-                      <p className="font-medium truncate max-w-[200px] sm:max-w-[300px]">
-                        {fileWithStatus.file.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {(fileWithStatus.file.size / 1024).toFixed(1)} KB
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {fileWithStatus.status === "idle" && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleUpload(fileWithStatus, index)}
-                      >
-                        Upload
-                      </Button>
-                    )}
-                    {fileWithStatus.status === "uploading" && (
-                      <div className="flex items-center space-x-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        <span className="text-sm">Uploading...</span>
-                      </div>
-                    )}
-                    {fileWithStatus.status === "success" && (
-                      <div className="flex items-center space-x-2 text-green-600">
-                        <CheckCircle className="h-4 w-4" />
-                        <span className="text-sm">Uploaded</span>
-                      </div>
-                    )}
-                    {fileWithStatus.status === "error" && (
-                      <div className="flex items-center space-x-2 text-red-600">
-                        <AlertCircle className="h-4 w-4" />
-                        <span className="text-sm">Failed</span>
-                      </div>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      className="text-gray-500 hover:text-red-600"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-                {fileWithStatus.status === "uploading" && (
-                  <Progress value={fileWithStatus.progress} className="h-2" />
-                )}
-                {fileWithStatus.status === "error" && fileWithStatus.error && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {fileWithStatus.error}
-                  </p>
-                )}
+      {file && (
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-3">
+              <FileText className="h-5 w-5 text-gray-500" />
+              <div>
+                <p className="font-medium truncate max-w-[300px]">
+                  {file.file.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {(file.file.size / 1024).toFixed(1)} KB
+                </p>
               </div>
-            ))}
+            </div>
+            <div className="flex items-center space-x-2">
+              {file.status === "idle" && (
+                <Button size="sm" onClick={handleUpload}>
+                  Upload
+                </Button>
+              )}
+              {file.status === "uploading" && (
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm">Uploading...</span>
+                </div>
+              )}
+              {file.status === "success" && (
+                <div className="flex items-center space-x-2 text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm">Uploaded</span>
+                </div>
+              )}
+              {file.status === "error" && (
+                <div className="flex items-center space-x-2 text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">Failed</span>
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFile(null)}
+                className="text-gray-500 hover:text-red-600"
+              >
+                Remove
+              </Button>
+            </div>
           </div>
-          {files.some((f) => f.status === "idle") && (
-            <Button
-              onClick={() => {
-                files.forEach((file, index) => {
-                  if (file.status === "idle") {
-                    handleUpload(file, index);
-                  }
-                });
-              }}
-            >
-              Upload All
-            </Button>
+          {file.status === "uploading" && (
+            <Progress value={file.progress} className="h-2" />
+          )}
+          {file.status === "error" && file.error && (
+            <p className="text-sm text-red-600 mt-1">{file.error}</p>
           )}
         </div>
       )}
+      <div>
+        {parsedText && (
+          <div className="mt-4 p-4 border rounded bg-gray-100">
+            <h3 className="font-semibold">Parsed Text:</h3>
+            <pre className="text-sm whitespace-pre-wrap">{parsedText}</pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -113,6 +113,9 @@ dependencies:
   '@react-pdf/renderer':
     specifier: ^4.2.3
     version: 4.2.3(react@19.0.0)
+  '@types/uuid':
+    specifier: ^10.0.0
+    version: 10.0.0
   ai:
     specifier: ^4.1.47
     version: 4.1.47(react@19.0.0)(zod@3.24.2)
@@ -137,6 +140,9 @@ dependencies:
   input-otp:
     specifier: ^1.4.2
     version: 1.4.2(react-dom@19.0.0)(react@19.0.0)
+  install:
+    specifier: ^0.13.0
+    version: 0.13.0
   lucide-react:
     specifier: ^0.477.0
     version: 0.477.0(react@19.0.0)
@@ -155,6 +161,9 @@ dependencies:
   pdf-parse:
     specifier: ^1.1.1
     version: 1.1.1
+  pdf2json:
+    specifier: ^3.1.5
+    version: 3.1.5
   pdfjs-dist:
     specifier: ^4.10.38
     version: 4.10.38
@@ -194,6 +203,9 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.7
     version: 1.0.7(tailwindcss@4.0.9)
+  uuid:
+    specifier: ^11.1.0
+    version: 11.1.0
   vaul:
     specifier: ^1.1.2
     version: 1.1.2(@types/react-dom@19.0.4)(@types/react@19.0.10)(react-dom@19.0.0)(react@19.0.0)
@@ -3957,6 +3969,10 @@ packages:
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
     dev: false
 
+  /@types/uuid@10.0.0:
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
+    dev: false
+
   /@typescript-eslint/eslint-plugin@8.25.0(@typescript-eslint/parser@8.25.0)(eslint@9.21.0)(typescript@5.8.2):
     resolution: {integrity: sha512-VM7bpzAe7JO/BFf40pIT1lJqS/z1F8OaSsUB3rpFJucQA4cOSuH2RVVVkFULN+En0Djgr29/jb4EQnedUo95KA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -5716,6 +5732,11 @@ packages:
       react-dom: 19.0.0(react@19.0.0)
     dev: false
 
+  /install@0.13.0:
+    resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
+    engines: {node: '>= 0.10'}
+    dev: false
+
   /internal-slot@1.1.0:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
     engines: {node: '>= 0.4'}
@@ -7080,6 +7101,14 @@ packages:
       - supports-color
     dev: false
 
+  /pdf2json@3.1.5:
+    resolution: {integrity: sha512-djZPInDLNuJU+o6GaJNvcoUh6MtUAx3IYTQCTxywHzeg1jC5YWgz/XzlgmduxxBblpMTqY2fjcWwvyRdGPTyrQ==}
+    engines: {node: '>=20.18.0', npm: '>=10.8.2'}
+    hasBin: true
+    dev: false
+    bundledDependencies:
+      - '@xmldom/xmldom'
+
   /pdfjs-dist@4.10.38:
     resolution: {integrity: sha512-/Y3fcFrXEAsMjJXeL9J8+ZG9U01LbuWaYypvDW2ycW1jL269L3js3DVBjDJ0Up9Np1uqDXsDrRihHANhZOlwdQ==}
     engines: {node: '>=20'}
@@ -8354,6 +8383,11 @@ packages:
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+    dev: false
+
+  /uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
     dev: false
 
   /uuid@9.0.1:
