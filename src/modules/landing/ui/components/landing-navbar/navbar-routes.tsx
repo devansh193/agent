@@ -17,8 +17,8 @@ const routes = [
     auth: true,
   },
   {
-    title: "Analytics",
-    href: "/analytics",
+    title: "Upload",
+    href: "/upload",
     auth: true,
   },
   {

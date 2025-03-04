@@ -9,5 +9,6 @@ export async function POST(req: Request) {
     model: google("gemini-2.0-flash"),
     messages,
   });
+  console.log(result);
   return result.toDataStreamResponse();
 }
